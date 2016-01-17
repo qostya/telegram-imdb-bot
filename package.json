@@ -1,0 +1,8 @@
+{
+  "name": "filmot",
+  "version": "0.0.1",
+  "dependencies": {
+    "node-telegram-bot-api": "~0.19.2",
+    "omdb": "~0.5.0"
+  }
+}
