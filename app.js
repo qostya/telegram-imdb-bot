@@ -21,7 +21,7 @@ function sendMessage(chatId, text, options) {
     );
 }
 
-function parseSearchData(msg, data) {
+function parseSearchData(data) {
     var text = '';
 
     data.forEach((item, index) => {
@@ -34,7 +34,7 @@ function parseSearchData(msg, data) {
 
     text += `Enter the number of film (1 - ${data.length}).`;
 
-    sendMessage(msg.chat.id, text);
+    return text;
 }
 
 function parseValidSearchAndSendMessage(msg) {
@@ -43,9 +43,9 @@ function parseValidSearchAndSendMessage(msg) {
     omdb.search(msg.text, (err, data) => {
         if (!err && data.length) {
             lastData = data;
-            parseSearchData(msg, data);
+            sendMessage(msg.chat.id, parseSearchData(data));
         } else {
-            sendMessage(msg.chat.id, `Sorry, not found.`);
+            sendMessage(msg.chat.id, `Sorry, nothing found.`);
         }
     });
 }
@@ -56,7 +56,7 @@ function createFullFilmMessage(film) {
         film.year = `${film.year.from} — ${film.year.to || '...'}`;
     }
 
-    return `Title: *${film.title}*\nYear: *${film.year}*\nDirector: *${film.director || 'unknown'}*\nRating IMDB: *${film.imdb.rating}*\n\n${film.plot ? ('Plot: ' + film.plot + ''): ''}\n\n${film.poster ? ('Poster: [' + film.imdb.id +'](' + film.poster + ')'): ''}`;
+    return `Title: *${film.title}*\nYear: *${film.year}*\nDirector: *${film.director || 'unknown'}*\nRating IMDB: *${film.imdb.rating}* (${film.imdb.votes} votes)\n\n${film.plot ? ('Plot: ' + film.plot + ''): ''}\n\n${film.poster ? ('Poster: [' + film.imdb.id +'](' + film.poster + ')'): ''}`;
 }
 
 bot.on('message', (msg) => {
@@ -69,10 +69,7 @@ bot.on('message', (msg) => {
                 imdb: lastData[messageToNumber].imdb
             }, (err, data) => {
                 if (!err) {
-                    sendMessage(msg.chat.id, createFullFilmMessage(data), {
-                        photo: data.poster,
-                        caption: data.title + ' (' + (data.year || 'unknown') + ')'
-                    });
+                    sendMessage(msg.chat.id, createFullFilmMessage(data));
                 }
             });
         }
